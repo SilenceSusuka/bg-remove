@@ -13,12 +13,12 @@ export interface ImageFile {
   processedFile?: File;
 }
 
-// Sample images from Unsplash
-const sampleImages = [
-  "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1513013156887-d2bf241c8c82?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1643490745745-e8ca9a3a1c90?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1574158622682-e40e69881006?q=80&w=2333&auto=format&fit=crop&ixlib=rb-4.0.3"
+// 试用图：public 目录角色示例
+const sampleImages: { url: string; label: string }[] = [
+  { url: "/雾雨魔理沙.png", label: "雾雨魔理沙" },
+  { url: "/珂朵莉.png", label: "珂朵莉" },
+  { url: "/秦心.png", label: "秦心" },
+  { url: "/友利奈绪.png", label: "友利奈绪" },
 ];
 
 // Check if the user is on mobile Safari
@@ -58,7 +58,7 @@ export default function App() {
     try {
       const initialized = await initializeModel(newModel);
       if (!initialized) {
-        throw new Error("Failed to initialize new model");
+        throw new Error("无法初始化新模型");
       }
       setCurrentModel(newModel);
     } catch (err) {
@@ -66,7 +66,7 @@ export default function App() {
         setCurrentModel('briaai/RMBG-1.4');
       } else {
         setError({
-          message: err instanceof Error ? err.message : "Failed to switch models"
+          message: err instanceof Error ? err.message : "切换模型失败",
         });
       }
     } finally {
@@ -89,14 +89,14 @@ export default function App() {
       try {
         const initialized = await initializeModel();
         if (!initialized) {
-          throw new Error("Failed to initialize background removal model");
+          throw new Error("背景移除模型加载失败");
         }
         // Update WebGPU support status after model initialization
         const { isWebGPUSupported } = getModelInfo();
         setIsWebGPU(isWebGPUSupported);
       } catch (err) {
         setError({
-          message: err instanceof Error ? err.message : "An unknown error occurred"
+          message: err instanceof Error ? err.message : "发生未知错误",
         });
         setImages([]); // Clear the newly added images if model fails to load
         setIsLoading(false);
@@ -142,10 +142,23 @@ export default function App() {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      const file = new File([blob], 'sample-image.jpg', { type: 'image/jpeg' });
+      const mime =
+        blob.type && blob.type.startsWith("image/")
+          ? blob.type
+          : url.endsWith(".png")
+            ? "image/png"
+            : url.endsWith(".ico")
+              ? "image/x-icon"
+              : "image/jpeg";
+      const ext = mime.includes("png")
+        ? "png"
+        : mime.includes("icon")
+          ? "ico"
+          : "jpg";
+      const file = new File([blob], `sample-image.${ext}`, { type: mime });
       onDrop([file]);
     } catch (error) {
-      console.error('Error loading sample image:', error);
+      console.error("加载试用图失败:", error);
     }
   };
 
@@ -158,149 +171,243 @@ export default function App() {
   } = useDropzone({
     onDrop,
     accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".mp4"],
+      "image/*": [".jpeg", ".jpg", ".png", ".webp", ".mp4"],
     },
   });
 
-  // Remove the full screen error and loading states
+  const modelLabel =
+    currentModel === "briaai/RMBG-1.4" ? "RMBG-1.4" : "MODNet";
 
   return (
-    <div className="min-h-screen bg-gray-50" onPaste={handlePaste}>
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-800">
-              BG
+    <div className="min-h-screen flex flex-col" onPaste={handlePaste}>
+      <nav className="sticky top-0 z-40 h-14 shrink-0 border-b border-rose-100/80 bg-white/90 backdrop-blur-md">
+        <div className="h-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <img
+              src="/favicon.png"
+              alt=""
+              className="h-8 w-8 rounded-lg object-cover ring-1 ring-rose-100 shrink-0"
+              width={32}
+              height={32}
+            />
+            <h1 className="text-sm sm:text-base font-bold bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text text-transparent truncate">
+              松坂砂糖的图像处理站
             </h1>
-            {!isIOS && (
-              <div className="flex items-center gap-4">
-                <span className="text-gray-600">Model:</span>
-                <select
-                  value={currentModel}
-                  onChange={handleModelChange}
-                  className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  disabled={!isWebGPU}
-                >
-                  <option value="briaai/RMBG-1.4">RMBG-1.4 (Cross-browser)</option>
-                  {isWebGPU && (
-                    <option value="Xenova/modnet">MODNet (WebGPU)</option>
-                  )}
-                </select>
-              </div>
-            )}
           </div>
+          {!isIOS && (
+            <div className="flex items-center gap-2 shrink-0">
+              <label htmlFor="model-select" className="sr-only">
+                选择模型
+              </label>
+              <select
+                id="model-select"
+                value={currentModel}
+                onChange={handleModelChange}
+                className="bg-white border border-rose-100 rounded-lg px-2.5 py-1 text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-200 max-w-[9.5rem] sm:max-w-none disabled:opacity-60"
+                disabled={isModelSwitching}
+                title="切换抠图模型（支持 WebGPU 时可选用 MODNet）"
+              >
+                <option value="briaai/RMBG-1.4">RMBG-1.4</option>
+                {isWebGPU && (
+                  <option value="Xenova/modnet">MODNet</option>
+                )}
+              </select>
+            </div>
+          )}
           {isIOS && (
-            <p className="text-sm text-gray-500 mt-2">
-              Using optimized iOS background removal
-            </p>
+            <span className="text-xs font-medium text-stone-500 truncate">
+              iOS 优化模式
+            </span>
           )}
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className={`grid ${images.length === 0 ? 'grid-cols-2 gap-8' : 'grid-cols-1'}`}>
+      <div
+        className="relative w-full h-[160px] sm:h-[180px] md:h-[200px] lg:h-[220px] overflow-hidden border-b border-rose-100/50 shrink-0 bg-rose-50/30"
+        aria-hidden
+      >
+        <img
+          src="/banner.png"
+          alt=""
+          className="absolute left-1/2 top-0 h-[115%] w-full min-w-full -translate-x-1/2 object-cover object-[center_12%] opacity-[0.38]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/55 to-[#fff8fb]" />
+      </div>
+
+      <main className="flex-1 w-full px-4 sm:px-6 py-10 md:py-12 flex flex-col items-stretch">
+        <div className="w-full max-w-2xl mx-auto flex flex-col">
           {images.length === 0 && (
-            <div className="flex flex-col justify-center items-start">
-              <img 
-                src="hero.png"
-                alt="Surprised man"
-                className="mb-6 w-full object-cover h-[400px]"
-              />
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Remove Image Background
+            <header className="text-center mb-8 space-y-2">
+              <h2 className="text-2xl sm:text-[26px] font-bold text-stone-800 tracking-tight">
+                去掉背景，留下角色本身
               </h2>
-              <p className="text-lg text-gray-600 mb-4">
-                100% Automatically and Free
+              <p className="text-sm sm:text-base text-stone-500">
+                浏览器本地处理，不上传服务器
               </p>
-              <p className="text-gray-500">
-                Upload your image and let our AI remove the background instantly. Perfect for professional photos, product images, and more.
-              </p>
-              <p className="text-sm text-gray-300 mt-4">
-                Built with love by Addy Osmani using Transformers.js
-              </p>
-            </div>
+            </header>
           )}
-          
-          <div className={images.length === 0 ? '' : 'w-full'}>
-            <div
-              {...getRootProps()}
-              className={`p-8 mb-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors duration-300 ease-in-out bg-white
-                ${isDragAccept ? "border-green-500 bg-green-50" : ""}
-                ${isDragReject ? "border-red-500 bg-red-50" : ""}
-                ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"}
-                ${isLoading || isModelSwitching ? "cursor-not-allowed" : ""}
+
+          {images.length > 0 && (
+            <p className="text-center text-sm text-stone-500 mb-4">
+              可继续拖入或点击上传，添加更多图片
+            </p>
+          )}
+
+          <div {...getRootProps()} className="w-full max-w-lg mx-auto">
+          <div
+            className={`rounded-2xl border-2 border-dashed px-8 py-10 text-center cursor-pointer transition-all duration-300 ease-in-out bg-white/95 shadow-soft backdrop-blur-sm
+                ${isDragAccept ? "border-emerald-400 bg-emerald-50/80" : ""}
+                ${isDragReject ? "border-red-400 bg-red-50/70" : ""}
+                ${
+                  isDragActive
+                    ? "border-rose-400 bg-rose-50/70 ring-2 ring-rose-100"
+                    : "border-rose-200/90 hover:border-rose-300 hover:bg-rose-50/30"
+                }
+                ${isLoading || isModelSwitching ? "cursor-not-allowed opacity-75" : ""}
               `}
-            >
-              <input {...getInputProps()} className="hidden" disabled={isLoading || isModelSwitching} />
-              <div className="flex flex-col items-center gap-2">
-                {isLoading || isModelSwitching ? (
-                  <>
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-2"></div>
-                    <p className="text-lg text-gray-600">
-                      {isModelSwitching ? 'Switching models...' : 'Loading background removal model...'}
-                    </p>
-                  </>
-                ) : error ? (
-                  <>
-                    <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p className="text-lg text-red-600 font-medium mb-2">{error.message}</p>
-                    {currentModel === 'Xenova/modnet' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleModelChange({ target: { value: 'briaai/RMBG-1.4' }} as any);
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                      >
-                        Switch to Cross-browser Version
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p className="text-lg text-gray-600">
-                      {isDragActive
-                        ? "Drop the images here..."
-                        : "Drag and drop images here"}
-                    </p>
-                    <p className="text-sm text-gray-500">or click to select files</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {images.length === 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-xl text-gray-700 font-semibold mb-4">No image? Try one of these:</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {sampleImages.map((url, index) => (
+          >
+            <input
+              {...getInputProps()}
+              className="hidden"
+              disabled={isLoading || isModelSwitching}
+            />
+            <div className="flex flex-col items-center gap-3">
+              {isLoading || isModelSwitching ? (
+                <>
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-rose-400 border-t-transparent" />
+                  <p className="text-stone-600 text-sm">
+                    {isModelSwitching
+                      ? "正在切换模型…"
+                      : "正在加载抠图模型…"}
+                  </p>
+                </>
+              ) : error ? (
+                <>
+                  <svg
+                    className="w-10 h-10 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <p className="text-red-600 text-sm font-medium">
+                    {error.message}
+                  </p>
+                  {currentModel === "Xenova/modnet" && (
                     <button
-                      key={index}
-                      onClick={() => handleSampleImageClick(url)}
-                      className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModelChange({
+                          target: { value: "briaai/RMBG-1.4" },
+                        } as React.ChangeEvent<HTMLSelectElement>);
+                      }}
+                      className="mt-1 px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs hover:bg-rose-600"
                     >
-                      <img
-                        src={url}
-                        alt={`Sample ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      改用 RMBG-1.4
                     </button>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-500 mt-4">
-                  All images are processed locally on your device and are not uploaded to any server.
-                </p>
-              </div>
-            )}
-
-            <Images images={images} onDelete={(id) => setImages(prev => prev.filter(img => img.id !== id))} />
+                  )}
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-11 h-11 text-rose-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <p className="text-stone-800 font-medium">
+                    {isDragActive
+                      ? "松开即可上传"
+                      : "拖入图片，或点击上传"}
+                  </p>
+                  <p className="text-xs sm:text-sm text-stone-400 tracking-wide">
+                    PNG / JPG / WEBP
+                  </p>
+                  <p className="text-xs text-stone-400">
+                    也可{" "}
+                    <kbd className="px-1 py-0.5 rounded border border-stone-200 bg-stone-50 text-stone-500">
+                      Ctrl+V
+                    </kbd>{" "}
+                    粘贴图片
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {images.length === 0 && (
+          <section
+            className="mt-10 w-full max-w-lg mx-auto rounded-2xl border border-rose-100/80 bg-white/80 p-4 sm:p-5 shadow-sm"
+            aria-label="试用示例图"
+          >
+            <h3 className="text-sm font-semibold text-stone-800 mb-0.5">
+              还没有图？点一张试试
+            </h3>
+            <p className="text-xs text-stone-500 mb-3">
+              素材来自本站 public，加载后同样仅在本地处理
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {sampleImages.map((item) => (
+                <button
+                  key={item.url}
+                  type="button"
+                  onClick={() => handleSampleImageClick(item.url)}
+                  className="group relative aspect-square overflow-hidden rounded-xl border border-rose-100/80 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200 transition-all"
+                >
+                  <img
+                    src={item.url}
+                    alt={item.label}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+        </div>
+
+        {images.length > 0 && (
+          <div className="w-full max-w-6xl mx-auto mt-10 lg:mt-12 lg:px-2">
+            <Images
+              images={images}
+              onDelete={(id) =>
+                setImages((prev) => prev.filter((img) => img.id !== id))
+              }
+            />
+          </div>
+        )}
+
+        <footer className="mt-12 pt-8 border-t border-rose-100/70 text-center text-xs sm:text-sm text-stone-500 space-y-3 max-w-lg mx-auto w-full px-2">
+          <p>
+            <span className="text-stone-600 font-medium">当前模型</span>
+            ：{modelLabel}
+            {!isIOS && isWebGPU && "（可在顶部切换 MODNet / WebGPU）"}
+            {!isIOS && !isWebGPU && "（跨浏览器通用）"}
+            {isIOS && "（已针对 Safari 优化）"}
+          </p>
+          <p className="leading-relaxed">
+            <span className="text-stone-600 font-medium">隐私与本地</span>
+            ：图片仅在您的浏览器内运算与暂存，不会上传到服务器；关闭页面后请及时下载留存。
+          </p>
+          <p className="text-stone-400 text-[11px] sm:text-xs">
+            基于 Transformers.js · 感谢 Addy Osmani 等开源贡献
+          </p>
+        </footer>
       </main>
     </div>
   );

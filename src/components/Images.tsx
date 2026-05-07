@@ -27,7 +27,7 @@ export function Images({ images, onDelete }: ImagesProps) {
 function Video({ video }: { video: ImageFile }) {
   const url = URL.createObjectURL(video.file);
   return (
-    <div className="bg-white rounded-lg shadow-md p-3">
+    <div className="bg-white/95 rounded-2xl border border-rose-100/80 shadow-soft p-3 backdrop-blur-sm">
       <video
         className="rounded-lg aspect-square object-cover"
         loop
@@ -59,7 +59,7 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
   const transparentBg = `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAGUExURb+/v////5nD/3QAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAUSURBVBjTYwABQSCglEENMxgYGAAynwRB8BEAgQAAAABJRU5ErkJggg==")`;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white/95 rounded-2xl border border-rose-100/80 shadow-soft overflow-hidden backdrop-blur-sm">
       <div className="relative">
         {isProcessing ? (
           <div className="relative">
@@ -71,7 +71,7 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-black bg-opacity-50 px-4 py-2 rounded-lg">
                 <div className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                <span className="text-white font-medium">Processing...</span>
+                <span className="text-white font-medium">处理中…</span>
               </div>
             </div>
           </div>
@@ -93,38 +93,38 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
       </div>
 
       {!isProcessing && (
-        <div className="p-3 border-t border-gray-100">
-          <div className="flex justify-center gap-2">
+        <div className="p-3 border-t border-rose-100/80 bg-rose-50/20">
+          <div className="flex justify-center gap-2 flex-wrap">
             <button
               onClick={() => onDelete(image.id)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-              title="Delete"
+              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-rose-100 rounded-xl hover:bg-rose-50/80 transition-colors text-sm"
+              title="删除"
             >
-              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <span className="text-sm text-gray-700">Delete</span>
+              <span className="text-stone-700">删除</span>
             </button>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-              title="Edit"
+              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-rose-100 rounded-xl hover:bg-rose-50/80 transition-colors text-sm"
+              title="编辑"
             >
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
-              <span className="text-sm text-gray-700">Edit</span>
+              <span className="text-stone-700">编辑</span>
             </button>
             <a
               href={processedImageUrl || processedURL}
               download={`processed-${image.id}.png`}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-              title="Download"
+              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-rose-100 rounded-xl hover:bg-rose-50/80 transition-colors text-sm"
+              title="下载"
             >
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              <span className="text-sm text-gray-700">Download</span>
+              <span className="text-stone-700">下载</span>
             </a>
           </div>
         </div>

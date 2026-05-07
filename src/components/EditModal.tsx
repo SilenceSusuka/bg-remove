@@ -9,15 +9,15 @@ interface EditModalProps {
 }
 
 const backgroundOptions = [
-  { id: 'color', label: 'Solid Color' },
-  { id: 'image', label: 'Image' }
+  { id: 'color', label: '纯色' },
+  { id: 'image', label: '图片' }
 ];
 
 const effectOptions = [
-  { id: 'none', label: 'None' },
-  { id: 'blur', label: 'Blur' },
-  { id: 'brightness', label: 'Bright' },
-  { id: 'contrast', label: 'Contrast' }
+  { id: 'none', label: '无' },
+  { id: 'blur', label: '模糊' },
+  { id: 'brightness', label: '亮度' },
+  { id: 'contrast', label: '对比度' }
 ];
 
 const predefinedColors = [
@@ -26,10 +26,10 @@ const predefinedColors = [
 ];
 
 const predefinedPatterns = [
-  { id: 'dots', label: 'Dots' },
-  { id: 'lines', label: 'Lines' },
-  { id: 'grid', label: 'Grid' },
-  { id: 'waves', label: 'Waves' }
+  { id: 'dots', label: '圆点' },
+  { id: 'lines', label: '线条' },
+  { id: 'grid', label: '网格' },
+  { id: 'waves', label: '波纹' }
 ];
 
 export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
@@ -166,13 +166,16 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/98 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-rose-100 shadow-soft">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Edit Image</h2>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text text-transparent">
+            编辑图像
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-stone-400 hover:text-stone-700 text-xl leading-none w-8 h-8 rounded-lg hover:bg-rose-50"
+            aria-label="关闭"
           >
             ✕
           </button>
@@ -181,16 +184,16 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium text-gray-700 mb-2">Background</h3>
-              <div className="flex gap-2 mb-4">
+              <h3 className="font-medium text-stone-700 mb-2">背景</h3>
+              <div className="flex gap-2 mb-4 flex-wrap">
                 {backgroundOptions.map(option => (
                   <button
                     key={option.id}
                     onClick={() => setBgType(option.id)}
-                    className={`px-3 py-1 rounded ${
+                    className={`px-3 py-1.5 rounded-xl text-sm transition-colors ${
                       bgType === option.id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-rose-500 text-white shadow-sm'
+                        : 'bg-rose-50 text-stone-700 hover:bg-rose-100/80'
                     }`}
                   >
                     {option.label}
@@ -200,12 +203,12 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
 
               {bgType === 'color' && (
                 <div>
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-2 flex-wrap">
                     {predefinedColors.map(color => (
                       <button
                         key={color}
                         onClick={() => setBgColor(color)}
-                        className="w-8 h-8 rounded-full border border-gray-300"
+                        className="w-8 h-8 rounded-full border border-rose-100 shadow-sm"
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -213,16 +216,16 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
                   <div className="flex items-center gap-2 mt-3">
                     <button
                       onClick={() => setShowCustomColorPicker(!showCustomColorPicker)}
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors text-sm text-gray-700"
+                      className="px-3 py-1.5 bg-white border border-rose-100 rounded-xl hover:bg-rose-50/80 transition-colors text-sm text-stone-700"
                     >
-                      Custom Color
+                      自定义颜色
                     </button>
                     {showCustomColorPicker && (
                       <input
                         type="color"
                         value={bgColor}
                         onChange={(e) => setBgColor(e.target.value)}
-                        className="w-8 h-8 border border-gray-400 rounded-md hover:bg-blue-200"
+                        className="w-8 h-8 border border-rose-200 rounded-lg cursor-pointer"
                       />
                     )}
                   </div>
@@ -234,22 +237,22 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setCustomBgImage(e.target.files?.[0] || null)}
-                  className="w-full"
+                  className="w-full text-sm text-stone-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-rose-50 file:text-rose-700"
                 />
               )}
             </div>
 
             <div>
-              <h3 className="font-medium text-gray-700 mb-2">Effects</h3>
-              <div className="flex gap-2 mb-4">
+              <h3 className="font-medium text-stone-700 mb-2">效果</h3>
+              <div className="flex gap-2 mb-4 flex-wrap">
                 {effectOptions.map(option => (
                   <button
                     key={option.id}
                     onClick={() => setSelectedEffect(option.id)}
-                    className={`px-3 py-1 rounded ${
+                    className={`px-3 py-1.5 rounded-xl text-sm transition-colors ${
                       selectedEffect === option.id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'bg-orange-50/80 text-stone-700 hover:bg-orange-100/80'
                     }`}
                   >
                     {option.label}
@@ -265,9 +268,9 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
                     max="100"
                     value={getCurrentEffectValue()}
                     onChange={(e) => handleEffectValueChange(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full accent-rose-500"
                   />
-                  <div className="flex justify-between text-sm text-gray-500">
+                  <div className="flex justify-between text-sm text-stone-500">
                     <span>0</span>
                     <span>{getCurrentEffectValue()}</span>
                     <span>100</span>
@@ -278,11 +281,11 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
           </div>
 
           <div>
-            <h3 className="font-medium text-gray-700 mb-2">Preview</h3>
-            <div className="border rounded-lg overflow-hidden">
+            <h3 className="font-medium text-stone-700 mb-2">预览</h3>
+            <div className="border border-rose-100 rounded-xl overflow-hidden bg-checkered">
               <img
                 src={exportUrl || processedURL}
-                alt="Preview"
+                alt="预览"
                 className="w-full object-contain"
               />
             </div>
@@ -292,15 +295,15 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+            className="px-4 py-2 text-stone-700 bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
           >
-            Cancel
+            取消
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="px-4 py-2 text-white bg-rose-500 rounded-xl hover:bg-rose-600 transition-colors shadow-sm"
           >
-            Save Changes
+            保存更改
           </button>
         </div>
       </div>

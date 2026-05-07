@@ -32,7 +32,13 @@
 }
 
 body {
-  background: linear-gradient(135deg, #5200ae, #4062bb);
+  background: linear-gradient(
+    165deg,
+    #fff8fb 0%,
+    #fffcf8 45%,
+    #fff5f0 100%
+  );
+  min-height: 100vh;
 }
 
 /* Slider styles */
