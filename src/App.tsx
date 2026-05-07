@@ -13,14 +13,6 @@ export interface ImageFile {
   processedFile?: File;
 }
 
-// 试用图：public 目录角色示例
-const sampleImages: { url: string; label: string }[] = [
-  { url: "/雾雨魔理沙.png", label: "雾雨魔理沙" },
-  { url: "/珂朵莉.png", label: "珂朵莉" },
-  { url: "/秦心.png", label: "秦心" },
-  { url: "/友利奈绪.png", label: "友利奈绪" },
-];
-
 // Check if the user is on mobile Safari
 const isMobileSafari = () => {
   const ua = window.navigator.userAgent;
@@ -137,30 +129,6 @@ export default function App() {
       onDrop(imageFiles);
     }
   };  
-
-  const handleSampleImageClick = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const mime =
-        blob.type && blob.type.startsWith("image/")
-          ? blob.type
-          : url.endsWith(".png")
-            ? "image/png"
-            : url.endsWith(".ico")
-              ? "image/x-icon"
-              : "image/jpeg";
-      const ext = mime.includes("png")
-        ? "png"
-        : mime.includes("icon")
-          ? "ico"
-          : "jpg";
-      const file = new File([blob], `sample-image.${ext}`, { type: mime });
-      onDrop([file]);
-    } catch (error) {
-      console.error("加载试用图失败:", error);
-    }
-  };
 
   const {
     getRootProps,
@@ -349,36 +317,6 @@ export default function App() {
             </div>
           </div>
         </div>
-
-        {images.length === 0 && (
-          <section
-            className="mt-10 w-full max-w-lg mx-auto rounded-2xl border border-rose-100/80 bg-white/80 p-4 sm:p-5 shadow-sm"
-            aria-label="试用示例图"
-          >
-            <h3 className="text-sm font-semibold text-stone-800 mb-0.5">
-              还没有图？点一张试试
-            </h3>
-            <p className="text-xs text-stone-500 mb-3">
-              素材来自本站 public，加载后同样仅在本地处理
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {sampleImages.map((item) => (
-                <button
-                  key={item.url}
-                  type="button"
-                  onClick={() => handleSampleImageClick(item.url)}
-                  className="group relative aspect-square overflow-hidden rounded-xl border border-rose-100/80 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200 transition-all"
-                >
-                  <img
-                    src={item.url}
-                    alt={item.label}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
         </div>
 
         {images.length > 0 && (
